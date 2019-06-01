@@ -41,17 +41,17 @@ dist: clean
 	rm -rf st-$(VERSION)
 
 install: st
-	#mkdir -p $(DESTDIR)$(PREFIX)/bin
-	#cp -f st $(DESTDIR)$(PREFIX)/bin
-	#cp -f st-copyout $(DESTDIR)$(PREFIX)/bin
-	cp -f st /home/sander/.sndr/bin
-	cp -f st-copyout /home/sander/.sndr/bin
-	chmod 755 /home/sander/.sndr/bin/st
-	chmod 755 /home/sander/.sndr/bin/st-copyout
-	#chmod 755 $(DESTDIR)$(PREFIX)/bin/st-copyout
-	#mkdir -p $(DESTDIR)$(MANPREFIX)/man1
-	#sed "s/VERSION/$(VERSION)/g" < st.1 > $(DESTDIR)$(MANPREFIX)/man1/st.1
-	#chmod 644 $(DESTDIR)$(MANPREFIX)/man1/st.1
+	mkdir -p $(DESTDIR)$(PREFIX)/bin
+	cp -f st $(DESTDIR)$(PREFIX)/bin
+	cp -f st-copyout $(DESTDIR)$(PREFIX)/bin
+	#cp -f st /home/sander/.sndr/bin
+	#cp -f st-copyout /home/sander/.sndr/bin
+	#chmod 755 /home/sander/.sndr/bin/st
+	#chmod 755 /home/sander/.sndr/bin/st-copyout
+	chmod 755 $(DESTDIR)$(PREFIX)/bin/st-copyout
+	mkdir -p $(DESTDIR)$(MANPREFIX)/man1
+	sed "s/VERSION/$(VERSION)/g" < st.1 > $(DESTDIR)$(MANPREFIX)/man1/st.1
+	chmod 644 $(DESTDIR)$(MANPREFIX)/man1/st.1
 	tic -sx st.info
 	@echo Please see the README file regarding the terminfo entry of st.
 
