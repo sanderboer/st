@@ -1502,7 +1502,11 @@ xdrawcursor(int cx, int cy, Glyph g, int ox, int oy, Glyph og)
 	/* draw the new one */
 	if (IS_SET(MODE_FOCUSED)) {
 		switch (win.cursor) {
-		case 7: /* st extension: snowman (U+2603) */
+      case 9: /* st extension: snowman (U+2603) */
+			g.u = 0x2022;
+      case 8: /* st extension: snowman (U+2603) */
+			g.u = 0x2665;
+      case 7: /* st extension: snowman (U+2603) */
 			g.u = 0x2603;
 		case 0: /* Blinking Block */
 		case 1: /* Blinking Block (Default) */

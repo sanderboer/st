@@ -126,8 +126,10 @@ static unsigned int defaultrcs = 0;
  * 4: Underline ("_")
  * 6: Bar ("|")
  * 7: Snowman ("☃")
+ * 8: heart ♥
+ * 9: dot •
  */
-static unsigned int cursorshape = 6;
+static unsigned int cursorshape = 9;
 
 /*
  * Default columns and rows numbers
@@ -237,23 +239,23 @@ static Shortcut shortcuts[] = {
 	{ MODKEY,               XK_Control_L,   iso14755,       {.i =  0} },
 	{ ShiftMask,            XK_Page_Up,     kscrollup,      {.i = -1} },
 	{ ShiftMask,            XK_Page_Down,   kscrolldown,    {.i = -1} },
-	{ MODKEY,               XK_Page_Up,     kscrollup,      {.i = -1} },
-	{ MODKEY,               XK_Page_Down,   kscrolldown,    {.i = -1} },
-	{ MODKEY,               XK_k,           kscrollup,      {.i =  1} },
-	{ MODKEY,               XK_j,           kscrolldown,    {.i =  1} },
-	{ MODKEY,               XK_Up,          kscrollup,      {.i =  1} },
-	{ MODKEY,               XK_Down,        kscrolldown,    {.i =  1} },
-	{ MODKEY,               XK_u,           kscrollup,      {.i = -1} },
-	{ MODKEY,               XK_d,           kscrolldown,    {.i = -1} },
+	// { MODKEY,               XK_Page_Up,     kscrollup,      {.i = -1} },
+	// { MODKEY,               XK_Page_Down,   kscrolldown,    {.i = -1} },
+  { MODKEY|ControlMask,    XK_k,           kscrollup,      {.i =  -1} },
+  { MODKEY|ControlMask,    XK_j,           kscrolldown,    {.i =  -1} },
+  // { MODKEY,               XK_Up,          kscrollup,      {.i =  1} },
+  // { MODKEY,               XK_Down,        kscrolldown,    {.i =  1} },
+  // { MODKEY,               XK_u,           kscrollup,      {.i = -1} },
+  // { MODKEY,               XK_d,           kscrolldown,    {.i = -1} },
 	{ ControlMask,          XK_Up,          zoom,           {.f = +1} },
 	{ ControlMask,          XK_Down,        zoom,           {.f = -1} },
-	{ TERMMOD,              XK_K,           zoom,           {.f = +1} },
-	{ TERMMOD,              XK_J,           zoom,           {.f = -1} },
-	{ TERMMOD,              XK_U,           zoom,           {.f = +2} },
-	{ TERMMOD,              XK_D,           zoom,           {.f = -2} },
-	{ MODKEY,               XK_l,           externalpipe,   {.v = openurlcmd } },
-	{ MODKEY,               XK_y,           externalpipe,   {.v = copyurlcmd } },
-	{ MODKEY,               XK_o,           externalpipe,   {.v = copyoutput } },
+	// { TERMMOD,              XK_K,           zoom,           {.f = +1} },
+	// { TERMMOD,              XK_J,           zoom,           {.f = -1} },
+	// { TERMMOD,              XK_U,           zoom,           {.f = +2} },
+	// { TERMMOD,              XK_D,           zoom,           {.f = -2} },
+  // { MODKEY,               XK_l,           externalpipe,   {.v = openurlcmd } },
+	// { MODKEY,               XK_y,           externalpipe,   {.v = copyurlcmd } },
+	// { MODKEY,               XK_o,           externalpipe,   {.v = copyoutput } },
 };
 
 /*
@@ -344,7 +346,7 @@ static Key key[] = {
 	{ XK_KP_Delete,     ShiftMask,      "\033[3;2~",    +1,    0},
 	{ XK_KP_Delete,     XK_ANY_MOD,     "\033[P",       -1,    0},
 	//{ XK_KP_Delete,     XK_ANY_MOD,     "\033[3~",      +1,    0},
-	{ XK_KP_Delete,     XK_ANY_MOD,     "\177",      +1,    0},
+	//{ XK_KP_Delete,     XK_ANY_MOD,     "\177",      +1,    0},
 	{ XK_KP_Multiply,   XK_ANY_MOD,     "\033Oj",       +2,    0},
 	{ XK_KP_Add,        XK_ANY_MOD,     "\033Ok",       +2,    0},
 	{ XK_KP_Enter,      XK_ANY_MOD,     "\033OM",       +2,    0},
@@ -412,8 +414,8 @@ static Key key[] = {
 	{ XK_Delete,        ShiftMask,      "\033[2K",      -1,    0},
 	{ XK_Delete,        ShiftMask,      "\033[3;2~",    +1,    0},
 	{ XK_Delete,        XK_ANY_MOD,     "\033[P",       -1,    0},
-	//{ XK_Delete,        XK_ANY_MOD,     "\033[3~",      +1,    0},
-	//{ XK_BackSpace,     XK_NO_MOD,      "\177",          0,    0},
+	// { XK_Delete,        XK_ANY_MOD,     "\033[3~",      +1,    0},
+	{ XK_BackSpace,     XK_NO_MOD,      "\177",          0,    0},
 	{ XK_Delete,        XK_ANY_MOD,     "\177",         +1,    0},
   { XK_BackSpace,     Mod1Mask,       "\033\177",      0,    0},
 	{ XK_Home,          ShiftMask,      "\033[2J",       0,   -1},
