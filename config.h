@@ -129,7 +129,7 @@ static unsigned int defaultrcs = 0;
  * 8: heart ♥
  * 9: dot •
  */
-static unsigned int cursorshape = 9;
+static unsigned int cursorshape = 4;
 
 /*
  * Default columns and rows numbers
