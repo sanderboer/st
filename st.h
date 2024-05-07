@@ -74,7 +74,6 @@ typedef union {
 	uint ui;
 	float f;
 	const void *v;
-<<<<<<< HEAD
 } Arg;
 
 typedef struct {
@@ -84,22 +83,14 @@ typedef struct {
 	const Arg arg;
 } MouseKey;
 
-=======
-	const char *s;
-} Arg;
-
->>>>>>> baa9357e96d2478baa52a3301e70ac80a229b726
 void die(const char *, ...);
 void redraw(void);
 void draw(void);
 
-<<<<<<< HEAD
 void externalpipe(const Arg *);
 void iso14755(const Arg *);
 void kscrolldown(const Arg *);
 void kscrollup(const Arg *);
-=======
->>>>>>> baa9357e96d2478baa52a3301e70ac80a229b726
 void printscreen(const Arg *);
 void printsel(const Arg *);
 void sendbreak(const Arg *);
@@ -110,11 +101,7 @@ void tnew(int, int);
 void tresize(int, int);
 void tsetdirtattr(int);
 void ttyhangup(void);
-<<<<<<< HEAD
 int ttynew(char *, char *, char *, char **);
-=======
-int ttynew(const char *, char *, const char *, char **);
->>>>>>> baa9357e96d2478baa52a3301e70ac80a229b726
 size_t ttyread(void);
 void ttyresize(int, int);
 void ttywrite(const char *, size_t, int);
@@ -132,33 +119,17 @@ size_t utf8encode(Rune, char *);
 
 void *xmalloc(size_t);
 void *xrealloc(void *, size_t);
-<<<<<<< HEAD
 char *xstrdup(char *);
 
 /* config.h globals */
 extern char *utmp;
-=======
-char *xstrdup(const char *);
-
-/* config.h globals */
-extern char *utmp;
-extern char *scroll;
->>>>>>> baa9357e96d2478baa52a3301e70ac80a229b726
 extern char *stty_args;
 extern char *vtiden;
 extern wchar_t *worddelimiters;
 extern int allowaltscreen;
-<<<<<<< HEAD
-=======
-extern int allowwindowops;
->>>>>>> baa9357e96d2478baa52a3301e70ac80a229b726
 extern char *termname;
 extern unsigned int tabspaces;
 extern unsigned int defaultfg;
 extern unsigned int defaultbg;
-<<<<<<< HEAD
 extern float alpha;
 extern MouseKey mkeys[];
-=======
-extern unsigned int defaultcs;
->>>>>>> baa9357e96d2478baa52a3301e70ac80a229b726
