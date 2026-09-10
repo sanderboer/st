@@ -33,6 +33,7 @@ enum glyph_attribute {
 	ATTR_WRAP       = 1 << 8,
 	ATTR_WIDE       = 1 << 9,
 	ATTR_WDUMMY     = 1 << 10,
+	ATTR_SIXEL      = 1 << 11,
 	ATTR_BOLD_FAINT = ATTR_BOLD | ATTR_FAINT,
 };
 
@@ -77,10 +78,23 @@ typedef union {
 	const char *s;
 } Arg;
 
+typedef struct _ImageList {
+	struct _ImageList *next, *prev;
+	unsigned char *pixels;
+	void *pixmap;
+	int width;
+	int height;
+	int x;
+	int y;
+	int should_delete;
+} ImageList;
+
 void die(const char *, ...);
 void redraw(void);
 void tfulldirt(void);
 void draw(void);
+void delete_image(ImageList **, ImageList *);
+void xdrawimages(ImageList **, Line *, int, int);
 
 void kscrolldown(const Arg *);
 void kscrollup(const Arg *);
@@ -114,6 +128,7 @@ void *xmalloc(size_t);
 void *xrealloc(void *, size_t);
 char *xstrdup(const char *);
 int  trt_kbdselect(KeySym, char *, int);
+
 /* config.h globals */
 extern char *utmp;
 extern char *scroll;

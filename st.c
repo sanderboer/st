@@ -21,6 +21,7 @@
 
 #include "st.h"
 #include "win.h"
+#include "sixel.h"
 
 #if   defined(__linux)
  #include <pty.h>
@@ -137,6 +138,8 @@ typedef struct {
 	int icharset; /* selected charset for sequence */
 	int *tabs;
 	Rune lastc;   /* last printed char outside of sequence, 0 if control */
+	ImageList *images;     /* sixel images */
+	ImageList *images_alt; /* sixel images for alternate screen */
 } Term;
 
 /* CSI Escape sequence structs */
@@ -231,6 +234,7 @@ static Term term;
 static Selection sel;
 static CSIEscape csiescseq;
 static STREscape strescseq;
+sixel_state_t sixel_st;
 static int iofd = 1;
 static int cmdfd;
 static pid_t pid;
@@ -1022,6 +1026,7 @@ void
 treset(void)
 {
 	uint i;
+	ImageList *im;
 
 	term.c = (TCursor){{
 		.mode = ATTR_NULL,
@@ -1044,6 +1049,9 @@ treset(void)
 		tclearregion(0, 0, term.col-1, term.row-1);
 		tswapscreen();
 	}
+
+	for (im = term.images; im; im = im->next)
+		im->should_delete = 1;
 }
 
 void
@@ -1058,9 +1066,12 @@ void
 tswapscreen(void)
 {
 	Line *tmp = term.line;
+	ImageList *im = term.images;
 
 	term.line = term.alt;
 	term.alt = tmp;
+	term.images = term.images_alt;
+	term.images_alt = im;
 	term.mode ^= MODE_ALTSCREEN;
 	tfulldirt();
 }
@@ -1103,6 +1114,7 @@ tscrolldown(int orig, int n, int copyhist)
 {
 	int i;
 	Line temp;
+	ImageList *im;
 
 	LIMIT(n, 0, term.bot-orig+1);
 	if (copyhist) {
@@ -1122,6 +1134,13 @@ tscrolldown(int orig, int n, int copyhist)
 		term.line[i-n] = temp;
 	}
 
+	for (im = term.images; im; im = im->next) {
+		if (im->y < term.bot)
+			im->y += n;
+		if (im->y > term.bot)
+			im->should_delete = 1;
+	}
+
 	if (term.scr == 0)
 		selscroll(orig, n);
 }
@@ -1131,6 +1150,7 @@ tscrollup(int orig, int n, int copyhist)
 {
 	int i;
 	Line temp;
+	ImageList *im;
 
 	LIMIT(n, 0, term.bot-orig+1);
 
@@ -1151,6 +1171,13 @@ tscrollup(int orig, int n, int copyhist)
 		temp = term.line[i];
 		term.line[i] = term.line[i+n];
 		term.line[i+n] = temp;
+	}
+
+	for (im = term.images; im; im = im->next) {
+		if (im->y+im->height/win.ch > term.top)
+			im->y -= n;
+		if (im->y+im->height/win.ch < term.top)
+			im->should_delete = 1;
 	}
 
 	if (term.scr == 0)
@@ -1928,6 +1955,8 @@ strhandle(void)
 {
 	char *p = NULL, *dec;
 	int j, narg, par;
+	ImageList *new_image;
+	int i;
 	const struct { int idx; char *str; } osc_table[] = {
 		{ defaultfg, "foreground" },
 		{ defaultbg, "background" },
@@ -2013,6 +2042,53 @@ strhandle(void)
 		xsettitle(strescseq.args[0]);
 		return;
 	case 'P': /* DCS -- Device Control String */
+		if (IS_SET(MODE_SIXEL)) {
+			term.mode &= ~MODE_SIXEL;
+			new_image = malloc(sizeof(ImageList));
+			memset(new_image, 0, sizeof(ImageList));
+			new_image->x = term.c.x;
+			new_image->y = term.c.y;
+			new_image->width = sixel_st.image.width;
+			new_image->height = sixel_st.image.height;
+			new_image->pixels = malloc(new_image->width * new_image->height * 4);
+			if (sixel_parser_finalize(&sixel_st, new_image->pixels) != 0) {
+				perror("sixel_parser_finalize() failed");
+				sixel_parser_deinit(&sixel_st);
+				return;
+			}
+			sixel_parser_deinit(&sixel_st);
+			/* verwijder vorige images en herstel achtergrond */
+			{
+				ImageList *im, *next;
+				for (im = term.images; im; im = next) {
+					next = im->next;
+					int y, x;
+					int w = (im->width + win.cw - 1) / win.cw;
+					int h = (im->height + win.ch - 1) / win.ch;
+					for (y = im->y; y < im->y + h && y < term.row; y++) {
+						for (x = im->x; x < im->x + w && x < term.col; x++) {
+							if (term.line[y][x].mode & ATTR_SIXEL)
+								term.line[y][x].mode &= ~ATTR_SIXEL;
+						}
+						term.dirty[y] = 1;
+					}
+					delete_image(&term.images, im);
+				}
+			}
+			term.images = new_image;
+			for (i = 0; i < (new_image->height + win.ch-1)/win.ch; ++i) {
+				int x;
+				int y = new_image->y + i;
+				if (y >= term.row)
+					break;
+				tclearregion(new_image->x, y, new_image->x+(new_image->width+win.cw-1)/win.cw, y);
+				for (x = new_image->x; x < MIN(term.col, new_image->x+(new_image->width+win.cw-1)/win.cw); x++)
+					term.line[y][x].mode |= ATTR_SIXEL;
+			}
+			/* cursor onder de image */
+			tmoveto(0, new_image->y + (new_image->height + win.ch - 1) / win.ch);
+		}
+		return;
 	case '_': /* APC -- Application Program Command */
 	case '^': /* PM -- Privacy Message */
 		return;
@@ -2444,6 +2520,23 @@ tputc(Rune u)
 			goto check_control_code;
 		}
 
+		if (IS_SET(MODE_SIXEL)) {
+			if (sixel_parser_parse(&sixel_st, (unsigned char *)&u, 1) != 0)
+				perror("sixel_parser_parse() failed");
+			return;
+		}
+
+		if (strescseq.type == 'P' && BETWEEN(u, 0x40, 0x7e)) {
+			/* DCS final byte */
+			if (u == 'q') {
+				/* DECSIXEL */
+				if (sixel_parser_init(&sixel_st, 0, 0, 1, win.cw, win.ch) != 0)
+					perror("sixel_parser_init() failed");
+				term.mode |= MODE_SIXEL;
+				return;
+			}
+		}
+
 		if (strescseq.len+len >= strescseq.siz) {
 			/*
 			 * Here is a bug in terminals. If the user never sends
@@ -2718,6 +2811,7 @@ draw(void)
 				term.ocx, term.ocy, term.line[term.ocy][term.ocx]);
 	term.ocx = cx;
 	term.ocy = term.c.y;
+	xdrawimages(&term.images, term.line, term.row, term.col);
 	xfinishdraw();
 	if (ocx != term.ocx || ocy != term.ocy)
 		xximspot(term.ocx, term.ocy);

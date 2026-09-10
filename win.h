@@ -1,5 +1,17 @@
 /* See LICENSE for license details. */
 
+typedef struct {
+	int tw, th; /* tty width and height */
+	int w, h; /* window width and height */
+	int hborderpx, vborderpx;
+	int ch; /* char height */
+	int cw; /* char width  */
+	int mode; /* window state/mode flags */
+	int cursor; /* cursor style */
+} TermWindow;
+
+extern TermWindow win;
+
 enum win_mode {
 	MODE_VISIBLE     = 1 << 0,
 	MODE_FOCUSED     = 1 << 1,
@@ -22,6 +34,7 @@ enum win_mode {
 	MODE_MOUSE       = MODE_MOUSEBTN|MODE_MOUSEMOTION|MODE_MOUSEX10\
 	                  |MODE_MOUSEMANY,
 	MODE_KBDSELECT   = 1 << 18,
+	MODE_SIXEL       = 1 << 19,
 };
 
 void xbell(void);
