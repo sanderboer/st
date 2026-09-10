@@ -33,7 +33,8 @@ enum glyph_attribute {
 	ATTR_WRAP       = 1 << 8,
 	ATTR_WIDE       = 1 << 9,
 	ATTR_WDUMMY     = 1 << 10,
-	ATTR_SIXEL      = 1 << 11,
+	ATTR_BOXDRAW    = 1 << 11,
+	ATTR_SIXEL      = 1 << 12,
 	ATTR_BOLD_FAINT = ATTR_BOLD | ATTR_FAINT,
 };
 
@@ -129,6 +130,13 @@ void *xrealloc(void *, size_t);
 char *xstrdup(const char *);
 int  trt_kbdselect(KeySym, char *, int);
 
+int isboxdraw(Rune);
+ushort boxdrawindex(const Glyph *);
+#ifdef XFT_VERSION
+void boxdraw_xinit(Display *, Colormap, XftDraw *, Visual *);
+void drawboxes(int, int, int, int, XftColor *, XftColor *, const XftGlyphFontSpec *, int);
+#endif
+
 /* config.h globals */
 extern char *utmp;
 extern char *scroll;
@@ -142,3 +150,4 @@ extern unsigned int tabspaces;
 extern unsigned int defaultfg;
 extern unsigned int defaultbg;
 extern unsigned int defaultcs;
+extern const int boxdraw, boxdraw_bold, boxdraw_braille;
